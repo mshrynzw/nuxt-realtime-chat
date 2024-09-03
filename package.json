@@ -18,12 +18,12 @@
     "@nuxtjs/composition-api": "^0.34.0",
     "@nuxtjs/supabase": "^1.4.0",
     "@supabase/supabase-js": "^2.45.3",
+    "consola": "^3.1.0",
     "core-js": "^3.25.3",
     "nuxt": "^2.15.8",
     "vue": "^2.7.10",
     "vue-server-renderer": "^2.7.10",
-    "vue-template-compiler": "^2.7.10",
-    "consola": "^3.1.0"
+    "vue-template-compiler": "^2.7.10"
   },
   "devDependencies": {
     "@babel/core": "^7.22.1",
@@ -40,6 +40,7 @@
     "eslint-plugin-vue": "^9.14.1",
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",
+    "typescript": "^5.5.4",
     "webpack": "^4.46.0"
   }
 }
