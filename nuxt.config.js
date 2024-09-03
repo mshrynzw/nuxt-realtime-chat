@@ -61,6 +61,6 @@ export default {
   router: {
     middleware: ['auth']
   },
-  ssr: false,
-  target: 'static',
+  ssr: true,
+  target: 'server',
 }
