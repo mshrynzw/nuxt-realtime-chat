@@ -34,6 +34,7 @@ export default {
     '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
     '@nuxtjs/supabase',
+     '@nuxtjs/vuetify',
     // https://go.nuxtjs.dev/tailwindcss
     '@nuxtjs/tailwindcss',
   ],
@@ -57,8 +58,12 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    publicPath: '/_nuxt/',
     transpile: ['pathe', '@nuxtjs/composition-api'],
     extend(config, { isServer }) {
+      if (isDev && isClient) {
+        config.devtool = 'source-map'
+      }
       config.module.rules.push({
         test: /\.m?js$/,
         include: [
@@ -78,6 +83,6 @@ export default {
   router: {
     middleware: ['auth']
   },
-  ssr: true,
-  target: 'server',
+  ssr: false,
+  target: 'static',
 }
