@@ -57,6 +57,19 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    extend(config, { isServer }) {
+      config.module.rules.push({
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-proposal-optional-chaining']
+          }
+        }
+      })
+    }
   },
   router: {
     middleware: ['auth']
