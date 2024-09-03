@@ -57,10 +57,27 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    transpile: ['pathe', '@nuxtjs/composition-api'],
+    extend(config, { isServer }) {
+      config.module.rules.push({
+        test: /\.m?js$/,
+        include: [
+          /node_modules\/pathe/,
+          /node_modules\/@nuxtjs\/composition-api/
+        ],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: ['@babel/plugin-proposal-nullish-coalescing-operator']
+          }
+        }
+      })
+    }
   },
   router: {
     middleware: ['auth']
   },
-  ssr: false,
-  target: 'static',
+  ssr: true,
+  target: 'server',
 }
