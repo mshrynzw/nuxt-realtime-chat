@@ -57,19 +57,32 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    babel: {
+      presets({ isServer }) {
+        return [
+          [
+            '@nuxt/babel-preset-app',
+            {
+              buildTarget: isServer ? 'server' : 'client',
+              corejs: { version: 3 }
+            }
+          ]
+        ]
+      }
+    },
     extend(config, { isServer }) {
       config.module.rules.push({
         test: /\.m?js$/,
-        exclude: /(node_modules|bower_components)/,
+        exclude: /(node_modules\/(?!pathe)|bower_components)/,
         use: {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-proposal-optional-chaining']
+            plugins: ['@babel/plugin-proposal-nullish-coalescing-operator']
           }
         }
       })
-    }
+    },
   },
   router: {
     middleware: ['auth']
