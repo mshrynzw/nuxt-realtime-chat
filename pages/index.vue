@@ -1,22 +1,26 @@
 <template>
-  <div v-if="user">
-    <div v-for="message in messages" :key="message.id">
-      <p>{{ message.content }}</p>
+  <div>
+    <div v-if="user">
+      <p>Total messages: {{ messages.length }}</p>
+      <div v-for="message in messages" :key="message.id">
+        <p>{{ message.content }} ({{ message.user_id }})</p>
+      </div>
+      <input v-model="newMessage" placeholder="Type a message" @keyup.enter="sendMessage" />
+      <button @click="sendMessage">Send</button>
     </div>
-    <input v-model="newMessage" placeholder="Type a message" />
-    <button @click="sendMessage">Send</button>
-  </div>
-  <div v-else>
-    <p>Please <nuxt-link to="/login">log in</nuxt-link> to join the chat.</p>
+    <div v-else>
+      <p>Please <nuxt-link to="/login">log in</nuxt-link> to join the chat.</p>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, onUnmounted, useContext } from '@nuxtjs/composition-api'
+import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 export default defineComponent({
   setup() {
-    const { app } = useContext()
+    const { app, redirect } = useContext()
     const $supabase = app.$supabase
     const user = ref<any>(null)
     const messages = ref<any[]>([])
@@ -24,11 +28,11 @@ export default defineComponent({
     let subscription: any = null
 
     const fetchUser = async () => {
-      const { data, error } = await $supabase.auth.getUser()
-      if (error) {
-        console.error('Error fetching user:', error.message)
+      const { data: { user: currentUser } } = await $supabase.auth.getUser()
+      if (currentUser) {
+        user.value = currentUser
       } else {
-        user.value = data.user
+        redirect('/login')
       }
     }
 
@@ -39,32 +43,50 @@ export default defineComponent({
         .order('created_at', { ascending: true })
 
       if (error) console.error('Error fetching messages:', error.message)
-      else messages.value = data
+      else {
+        messages.value = data || []
+        console.log('Initial messages:', messages.value)
+      }
     }
 
     const sendMessage = async () => {
-      if (!user.value) return
-      const { error } = await $supabase
+      if (!user.value || !newMessage.value.trim()) return
+      const { data, error } = await $supabase
         .from('messages')
-        .insert([{ 
-          content: newMessage.value, 
-          user_id: user.value.id 
-        }])
+        .insert([{ content: newMessage.value, user_id: user.value.id }])
+        .select()
 
       if (error) console.error('Error sending message:', error.message)
       else {
+        console.log('Message sent:', data)
         newMessage.value = ''
-        await fetchMessages() // メッセージを再取得
+        // リアルタイムイベントで処理されるため、ここでmessages.valueを更新しない
       }
     }
 
     const setupRealtime = () => {
       subscription = $supabase
         .channel('public:messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-          messages.value.push(payload.new)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages' },
+          (payload: RealtimePostgresChangesPayload<{
+            id: number;
+            content: string;
+            user_id: string;
+            created_at: string;
+          }>) => {
+            console.log('New message received:', payload.new)
+            console.log('Current messages before update:', messages.value)
+            messages.value = [...messages.value, payload.new]
+            console.log('Current messages after update:', messages.value)
+          }
+        )
+        .subscribe((status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
+          console.log('Realtime subscription status:', status)
         })
-        .subscribe()
+
+      console.log('Realtime subscription set up')
     }
 
     onMounted(() => {

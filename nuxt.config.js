@@ -33,6 +33,7 @@ export default {
     // https://go.nuxtjs.dev/typescript
     '@nuxt/typescript-build',
     '@nuxtjs/composition-api/module',
+    '@nuxtjs/supabase',
     // https://go.nuxtjs.dev/tailwindcss
     '@nuxtjs/tailwindcss',
   ],
@@ -49,10 +50,17 @@ export default {
     baseURL: '/',
   },
 
+  publicRuntimeConfig: {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_KEY: process.env.SUPABASE_KEY,
+  },
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
   },
   router: {
     middleware: ['auth']
   },
+  ssr: false,
+  target: 'static',
 }

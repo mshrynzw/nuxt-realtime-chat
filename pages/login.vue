@@ -8,13 +8,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, useContext, onMounted } from '@nuxtjs/composition-api'
+import { defineComponent, ref, useContext } from '@nuxtjs/composition-api'
 
 export default defineComponent({
   setup() {
-    const { app } = useContext()
+    const { app, redirect } = useContext()
     const $supabase = app.$supabase
-    const router = app.router
     const email = ref('')
     const password = ref('')
 
@@ -27,7 +26,9 @@ export default defineComponent({
         console.error('Error signing in:', error.message)
       } else {
         console.log('Sign in successful:', data)
-        router?.push('/')
+        // セッションを保存
+        await $supabase.auth.setSession(data.session)
+        redirect('/')
       }
     }
 
@@ -43,15 +44,6 @@ export default defineComponent({
         // ここでユーザーにメールを確認するよう指示するメッセージを表示するとよいでしょう
       }
     }
-
-    onMounted(async () => {
-      const { data, error } = await $supabase.auth.getSession()
-      if (error) {
-        console.error('Error getting session:', error.message)
-      } else {
-        console.log('Current session:', data)
-      }
-    })
 
     return { email, password, signIn, signUp }
   }

@@ -1,8 +1,8 @@
 import { Middleware } from '@nuxt/types'
 
 const authMiddleware: Middleware = async ({ app, redirect }) => {
-  const { data, error } = await app.$supabase.auth.getSession()
-  if (error || !data.session) {
+  const { data: { session } } = await app.$supabase.auth.getSession()
+  if (!session) {
     return redirect('/login')
   }
 }
