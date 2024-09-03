@@ -60,7 +60,7 @@ export default {
   build: {
     publicPath: '/_nuxt/',
     transpile: ['pathe', '@nuxtjs/composition-api'],
-    extend(config, { isServer }) {
+    extend(config, { isDev, isClient }) {
       if (isDev && isClient) {
         config.devtool = 'source-map'
       }
