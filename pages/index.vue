@@ -5,22 +5,43 @@
       <div v-for="message in messages" :key="message.id">
         <p>{{ message.content }} ({{ message.user_id }})</p>
       </div>
-      <input v-model="newMessage" placeholder="Type a message" @keyup.enter="sendMessage" />
+      <input
+        v-model="newMessage"
+        placeholder="Type a message"
+        @keyup.enter="sendMessage"
+      />
       <button @click="sendMessage">Send</button>
+      <button @click="logout">ログアウト</button>
     </div>
     <div v-else>
-      <p>Please <nuxt-link to="/login">log in</nuxt-link> to join the chat.</p>
+      <p>
+        Please
+        <nuxt-link to="/login">log in</nuxt-link>
+        to join the chat.
+      </p>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted, useContext } from '@nuxtjs/composition-api'
-import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import {
+  defineComponent,
+  ref,
+  useContext,
+  useRouter,
+  useRoute,
+} from '@nuxtjs/composition-api'
+import {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js'
+import { onMounted, onUnmounted } from 'vue'
 
 export default defineComponent({
   setup() {
-    const { app, redirect } = useContext()
+    const { app, store } = useContext()
+    const router = useRouter()
+    const route = useRoute()
     const $supabase = app.$supabase
     const user = ref<any>(null)
     const messages = ref<any[]>([])
@@ -28,11 +49,13 @@ export default defineComponent({
     let subscription: any = null
 
     const fetchUser = async () => {
-      const { data: { user: currentUser } } = await $supabase.auth.getUser()
+      const {
+        data: { user: currentUser },
+      } = await $supabase.auth.getUser()
       if (currentUser) {
         user.value = currentUser
       } else {
-        redirect('/login')
+        router.push('/login')
       }
     }
 
@@ -64,27 +87,46 @@ export default defineComponent({
       }
     }
 
+    const logout = async () => {
+      const { error } = await $supabase.auth.signOut()
+      if (error) {
+        console.error('ログアウトエラー:', error.message)
+      } else {
+        console.log('ログアウト成功')
+        // ストアの認証状態をクリア
+        store.commit('setAuthState', { event: 'SIGNED_OUT', session: null })
+        // 明示的にログインページにリダイレクト
+        if (route.value.path !== '/login') {
+          router.push('/login')
+        }
+      }
+    }
+
     const setupRealtime = () => {
       subscription = $supabase
         .channel('public:messages')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'messages' },
-          (payload: RealtimePostgresChangesPayload<{
-            id: number;
-            content: string;
-            user_id: string;
-            created_at: string;
-          }>) => {
+          (
+            payload: RealtimePostgresChangesPayload<{
+              id: number
+              content: string
+              user_id: string
+              created_at: string
+            }>
+          ) => {
             console.log('New message received:', payload.new)
             console.log('Current messages before update:', messages.value)
             messages.value = [...messages.value, payload.new]
             console.log('Current messages after update:', messages.value)
           }
         )
-        .subscribe((status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
-          console.log('Realtime subscription status:', status)
-        })
+        .subscribe(
+          (status: 'SUBSCRIBED' | 'CLOSED' | 'CHANNEL_ERROR' | 'TIMED_OUT') => {
+            console.log('Realtime subscription status:', status)
+          }
+        )
 
       console.log('Realtime subscription set up')
     }
@@ -101,7 +143,7 @@ export default defineComponent({
       }
     })
 
-    return { user, messages, newMessage, sendMessage }
-  }
+    return { user, messages, newMessage, sendMessage, logout }
+  },
 })
 </script>

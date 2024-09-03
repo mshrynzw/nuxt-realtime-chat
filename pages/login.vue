@@ -8,11 +8,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, useContext } from '@nuxtjs/composition-api'
+import {
+  defineComponent,
+  ref,
+  useContext,
+  useRouter,
+} from '@nuxtjs/composition-api'
 
 export default defineComponent({
   setup() {
-    const { app, redirect } = useContext()
+    const { app } = useContext()
+    const router = useRouter()
     const $supabase = app.$supabase
     const email = ref('')
     const password = ref('')
@@ -23,12 +29,12 @@ export default defineComponent({
         password: password.value,
       })
       if (error) {
-        console.error('Error signing in:', error.message)
+        console.error('ログインエラー:', error.message)
       } else {
-        console.log('Sign in successful:', data)
-        // セッションを保存
-        await $supabase.auth.setSession(data.session)
-        redirect('/')
+        console.log('ログイン成功:', data)
+        // ユーザー情報を保存
+        localStorage.setItem('user', JSON.stringify(data.user))
+        router.push('/')
       }
     }
 
@@ -46,6 +52,6 @@ export default defineComponent({
     }
 
     return { email, password, signIn, signUp }
-  }
+  },
 })
 </script>
