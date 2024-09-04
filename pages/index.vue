@@ -10,35 +10,35 @@
           <div class="p-4 sm:p-7">
             <div class="text-center">
               <h1
-                class="mb-7 text-4xl sm:text-6xl font-bold text-gray-800 dark:text-neutral-200"
+                class="mb-3 text-4xl sm:text-6xl font-bold text-gray-800 dark:text-neutral-200"
               >
                 Realtime Chat
               </h1>
 
               <div v-if="user">
                 <div
-                  class="relative z-10 flex gap-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20"
+                  class="relative z-10 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20"
                 >
-                  <div class="w-full flex space-x-2">
-                    <input
-                      v-model="newMessage"
-                      placeholder="Type a message"
-                      class="py-2.5 px-4 block w-full border-transparent rounded-lg focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                      @keyup.enter="sendMessage"
-                    />
-                    <button
-                      class="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                      @click="sendMessage"
-                    >
-                      Send
-                    </button>
-                    <button
-                      class="m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
-                      @click="logout"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                  <input
+                    v-model="newMessage"
+                    placeholder="Type a message"
+                    class="py-2.5 px-4 block w-full border-transparent rounded-lg focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-transparent dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                    @keyup.enter="sendMessage"
+                  />
+                </div>
+                <div class="w-full flex justify-center space-x-2 mt-2">
+                  <button
+                    class="w-full text-center justify-center m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                    @click="sendMessage"
+                  >
+                    Send
+                  </button>
+                  <button
+                    class="w-full text-center justify-center m-1 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+                    @click="logout"
+                  >
+                    Logout
+                  </button>
                 </div>
                 <p class="mt-3 text-gray-600 dark:text-neutral-400">
                   Total messages: {{ messages.length }}
@@ -78,11 +78,8 @@ import {
   useRouter,
   useRoute,
 } from '@nuxtjs/composition-api'
-import {
-  RealtimePostgresChangesPayload,
-} from '@supabase/supabase-js'
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { onMounted, onUnmounted } from 'vue'
-
 
 export default defineComponent({
   setup() {
@@ -104,7 +101,7 @@ export default defineComponent({
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
       }
       return new Intl.DateTimeFormat('ja-JP', options).format(date)
     }
@@ -179,7 +176,7 @@ export default defineComponent({
           ) => {
             console.log('New message received:', payload.new)
             console.log('Current messages before update:', messages.value)
-            messages.value = [...messages.value, payload.new]
+            messages.value = [payload.new, ...messages.value]
             console.log('Current messages after update:', messages.value)
           }
         )
