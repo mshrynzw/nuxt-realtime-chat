@@ -3,7 +3,7 @@ export default {
   head: {
     title: 'nuxt-realtime-chat',
     htmlAttrs: {
-      lang: 'en'
+      lang: 'ja'
     },
     meta: [
       { charset: 'utf-8' },
@@ -61,6 +61,6 @@ export default {
   router: {
     middleware: ['auth']
   },
-  ssr: false,
+  ssr: true,
   target: 'static',
 }
