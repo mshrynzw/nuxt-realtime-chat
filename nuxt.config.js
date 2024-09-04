@@ -61,6 +61,7 @@ export default {
   router: {
     middleware: ['auth']
   },
-  ssr: true,
-  target: 'static',
+  nitro: {
+    static: true,
+  }
 }
